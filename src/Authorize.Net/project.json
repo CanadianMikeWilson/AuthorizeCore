@@ -1,0 +1,29 @@
+{
+  "version": "1.0.0-*",
+  "description": "Authorize.NET for Core Clr",
+  "authors": [
+    "mwilson"
+  ],
+  "tags": [
+    ""
+  ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "dependencies": {
+    "System.Net.Http": "4.0.1-beta-23516"
+  },
+  "frameworks": {
+    "dnx451": {
+        "frameworkAssemblies": {
+            "System.Xml": "",
+            "System.Xml.ReaderWriter": "",
+            "System.Runtime": ""
+        }
+    },
+    "dnxcore50": {
+        "dependencies": {
+            "System.Xml.XmlDocument": "4.0.1-beta-23516"
+        }
+    }
+  }
+}
