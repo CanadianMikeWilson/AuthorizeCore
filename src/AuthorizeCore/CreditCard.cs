@@ -1,4 +1,4 @@
-namespace Authorize.NET
+namespace AuthorizeCore
 {
     public class CreditCard
     {

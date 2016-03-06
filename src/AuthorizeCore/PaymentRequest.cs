@@ -1,8 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AuthorizeCore.Response;
 
-namespace Authorize.NET
+namespace AuthorizeCore
 {
     public class PaymentRequest : IPaymentRequest
     {
@@ -82,7 +82,7 @@ namespace Authorize.NET
             LineItems.Add(lineItem);
         }
 
-        public async Task<string> ProcessPaymentRequest()
+        public async Task<IPaymentResponse> ProcessPaymentRequest()
         {
             return await _client.ChargeCard(this);
         }

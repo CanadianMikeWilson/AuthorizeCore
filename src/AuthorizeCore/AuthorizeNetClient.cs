@@ -3,8 +3,9 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml;
+using AuthorizeCore.Response;
 
-namespace Authorize.NET
+namespace AuthorizeCore
 {
     internal static class XmlDocumentExtensions
     {
@@ -28,19 +29,21 @@ namespace Authorize.NET
     }
     public class AuthorizeNetClient : IAuthorizeNetClient
     {
-        // string baseUrl = "https://api.authorize.net";
-        private const string baseUrl = "https://apitest.authorize.net";
+        private const string baseUrlLive = "https://api.authorize.net";
+        private const string baseUrlTest = "https://apitest.authorize.net";
+        private readonly string baseUrl;
         private const string xmlns = "AnetApi/xml/v1/schema/AnetApiSchema.xsd";
 
         private readonly string _apiName;
         private readonly string _apiKey;
-        public AuthorizeNetClient(string apiName, string apiKey)
+        public AuthorizeNetClient(string apiName, string apiKey, bool liveMode)
         {
             _apiName = apiName;
             _apiKey = apiKey;
+            baseUrl = (liveMode ? baseUrlLive : baseUrlTest);
         }
         
-        public async Task<string> Authorize()
+        public async Task<IPaymentResponse> Authorize()
         {
             var xmlDoc = new XmlDocument();
             var rootNode = xmlDoc.CreateElement("authenticateTestRequest", xmlns);
@@ -50,7 +53,8 @@ namespace Authorize.NET
             
             using (var request = new HttpClient()) {
                 using ( var response = await request.PostAsync(new Uri(baseUrl + "/xml/v1/request.api"), new StringContent(xmlDoc.SaveToString()))) {
-                    return await response.Content.ReadAsStringAsync();
+                    var xmlString = await response.Content.ReadAsStringAsync();
+                    return ParseAuthorizeResponse(xmlString);
                 }
             }
         }
@@ -92,8 +96,17 @@ namespace Authorize.NET
             return payment;
         }
 
-        public async Task<string> ChargeCard(PaymentRequest paymentRequest)
+        public async Task<IPaymentResponse> ChargeCard(PaymentRequest paymentRequest)
         {
+            if ( paymentRequest.Amount <= 0 ) return new PaymentFailure("Invalid amount provided", string.Empty);
+            if ( paymentRequest.LineItems.Count == 0 ) return new PaymentFailure("No line items provided.", string.Empty);
+            if ( string.IsNullOrEmpty(paymentRequest.CreditCard.CardNumber ) ) return new PaymentFailure("No credit card number provided.", string.Empty);
+            if ( string.IsNullOrEmpty(paymentRequest.CreditCard.ExpirationDate ) ) return new PaymentFailure("No expiration date provided.", string.Empty);
+            if ( paymentRequest.CreditCard.ExpirationDate.Length < 4 ) return new PaymentFailure("Invalid expiration date provided.", string.Empty);
+            if ( string.IsNullOrEmpty(paymentRequest.CreditCard.Cvv ) ) return new PaymentFailure("No cvv provided.", string.Empty);
+            if ( paymentRequest.CreditCard.Cvv.Length < 3 ) return new PaymentFailure("Invalid cvv provided.", string.Empty);
+            if ( paymentRequest.CreditCard.Cvv.Length > 4 ) return new PaymentFailure("Invalid cvv provided.", string.Empty);
+            
             var xmlDoc = new XmlDocument();
             var rootNode = xmlDoc.CreateElement("createTransactionRequest", xmlns);
             xmlDoc.AppendChild(rootNode);
@@ -162,7 +175,8 @@ namespace Authorize.NET
             rootNode.AppendChild(transactionRequest);
             using (var request = new HttpClient()) {
                 using ( var response = await request.PostAsync(new Uri(baseUrl + "/xml/v1/request.api"), new StringContent(xmlDoc.SaveToString()))) {
-                    return await response.Content.ReadAsStringAsync();
+                    var xmlString = await response.Content.ReadAsStringAsync();
+                    return ParsePaymentResponse(xmlString);
                 }
             }
         }
@@ -203,6 +217,77 @@ namespace Authorize.NET
             paymentRequest.RefId = orderId.ToString();
             paymentRequest.CustomerId = customerId;
             return paymentRequest;
+        }
+        
+        private IPaymentResponse ParseAuthorizeResponse(string xmlString)
+        {
+            var responseDoc = new XmlDocument();
+            responseDoc.LoadXml(xmlString);
+            var resultCode = responseDoc.GetElementsByTagName("resultCode");
+            if (resultCode.Count > 0 ) {
+                var resultCodeStr = resultCode.Item(0).InnerText;
+                if ( resultCodeStr.Equals("Ok")) {
+                    return new AuthorizationSuccess(resultCodeStr, xmlString);
+                } else {
+                    var messageElement = responseDoc.GetElementsByTagName("message");
+                    var it = messageElement.GetEnumerator();
+                    for ( var i = 0; i < messageElement.Count; i++ ) {
+                        var el = messageElement.Item(i);
+                        if ( el.Name.Equals("text")) {
+                            return new AuthorizationFailure(el.InnerText, xmlString);
+                        }
+                    }
+                }
+            }
+            return new AuthorizationFailure("Unable to Parse XML", xmlString);
+        }
+        
+        private IPaymentResponse ParsePaymentResponse(string xmlString)
+        {
+            var responseDoc = new XmlDocument();
+            responseDoc.LoadXml(xmlString);
+            var transactionResponseList = responseDoc.GetElementsByTagName("transactionResponse");
+            if (transactionResponseList.Count > 0 ) {
+                var transactionResponse = transactionResponseList.Item(0);
+                string responseCode = "";
+                string errorText = "";
+                string errorCode = "";
+                for ( var idx = 0; idx < transactionResponse.ChildNodes.Count; idx++ ) {
+                    var el = transactionResponse.ChildNodes[idx];
+                    if ( el.Name.Equals("responseCode")) {
+                        responseCode = el.InnerText;
+                    }
+                    if ( el.Name.Equals("errors") ) {
+                        for ( var errorIdx=0; errorIdx < el.ChildNodes.Count; errorIdx++ ) {
+                            var error = el.ChildNodes[errorIdx];
+                            for ( var eidx=0; eidx < error.ChildNodes.Count; eidx++ ) {
+                                var errorEl = error.ChildNodes[eidx];
+                                if ( errorEl.Name.Equals("errorCode")) {
+                                    errorCode = errorEl.InnerText; 
+                                }
+                                if ( errorEl.Name.Equals("errorText")) {
+                                    errorText = errorEl.InnerText;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if ( responseCode.Equals("1") ) {
+                    return new PaymentSuccess("This transaction has been approved.", xmlString) {
+                        ResponseCode = responseCode,
+                        ErrorCode = errorCode
+                    };
+                }
+                
+                if ( !string.IsNullOrEmpty(errorText)) {
+                    var failure = new PaymentFailure(errorText, xmlString);
+                    failure.ResponseCode = responseCode;
+                    failure.ErrorCode = errorCode;
+                    return failure;
+                }
+            }
+            return new PaymentFailure("Unable to Parse XML", xmlString);
         }
     }
 }

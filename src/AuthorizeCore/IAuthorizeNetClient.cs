@@ -1,10 +1,11 @@
 using System.Threading.Tasks;
+using AuthorizeCore.Response;
 
-namespace Authorize.NET
+namespace AuthorizeCore
 {
     public interface IAuthorizeNetClient
     {
-        Task<string> Authorize();
+        Task<IPaymentResponse> Authorize();
         IPaymentRequest CreatePaymentRequest(long customerId, long orderId, decimal amount);
     }
 }
