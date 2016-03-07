@@ -252,6 +252,13 @@ namespace AuthorizeCore
                 string responseCode = "";
                 string errorText = "";
                 string errorCode = "";
+                var authCode = "";
+                var avsResultCode = "";
+                var cavvResultCode = "";
+                var transId = "";
+                var transHash = "";
+                var accountNumber = "";
+                var accountType = "";
                 for ( var idx = 0; idx < transactionResponse.ChildNodes.Count; idx++ ) {
                     var el = transactionResponse.ChildNodes[idx];
                     if ( el.Name.Equals("responseCode")) {
@@ -271,20 +278,50 @@ namespace AuthorizeCore
                             }
                         }
                     }
+                    if ( el.Name.Equals("authCode")) {
+                        authCode = el.InnerText;
+                    }
+                    if ( el.Name.Equals("avsResultCode")) {
+                        avsResultCode = el.InnerText;
+                    }
+                    if ( el.Name.Equals("cavvResultCode")) {
+                        cavvResultCode = el.InnerText;
+                    }
+                    if ( el.Name.Equals("transId")) {
+                        transId = el.InnerText;
+                    }
+                    if ( el.Name.Equals("transHash")) {
+                        transHash = el.InnerText;
+                    }
+                    if ( el.Name.Equals("accountNumber")) {
+                        accountNumber = el.InnerText;
+                    }
+                    if ( el.Name.Equals("accountType")) {
+                        accountType = el.InnerText;
+                    }
                 }
                 
+                PaymentResponse paymentResponse = null;
                 if ( responseCode.Equals("1") ) {
-                    return new PaymentSuccess("This transaction has been approved.", xmlString) {
+                    paymentResponse = new PaymentSuccess("This transaction has been approved.", xmlString) {
                         ResponseCode = responseCode,
                         ErrorCode = errorCode
                     };
+                } else if ( !string.IsNullOrEmpty(errorText)) {
+                    paymentResponse = new PaymentFailure(errorText, xmlString);
+                    paymentResponse.ResponseCode = responseCode;
+                    paymentResponse.ErrorCode = errorCode;
                 }
                 
-                if ( !string.IsNullOrEmpty(errorText)) {
-                    var failure = new PaymentFailure(errorText, xmlString);
-                    failure.ResponseCode = responseCode;
-                    failure.ErrorCode = errorCode;
-                    return failure;
+                if ( null != paymentResponse ) {
+                    paymentResponse.AuthCode = authCode;
+                    paymentResponse.AvsResultCode = avsResultCode;
+                    paymentResponse.CavvResultCode = cavvResultCode;
+                    paymentResponse.TransId = transId;
+                    paymentResponse.TransHash = transHash;
+                    paymentResponse.AccountNumber = accountNumber;
+                    paymentResponse.AccountType = accountType;                    
+                    return paymentResponse;
                 }
             }
             return new PaymentFailure("Unable to Parse XML", xmlString);
