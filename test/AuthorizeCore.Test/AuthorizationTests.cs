@@ -14,6 +14,7 @@ namespace AuthorizeCore.Test
         {
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile(Path.Combine(".", $"config.json"));
 
             var Configuration = builder.Build();

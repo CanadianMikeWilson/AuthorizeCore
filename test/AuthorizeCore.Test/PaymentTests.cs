@@ -20,6 +20,7 @@ namespace AuthorizeCore.Test
             _expirydate = string.Format("{0:MMyy}", System.DateTime.Now.AddYears(3));
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile(Path.Combine(".", $"config.json"));
 
             var Configuration = builder.Build();
