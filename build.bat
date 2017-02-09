@@ -21,7 +21,7 @@ REM - Option 1: Run dotnet build for every source folder in the project
 REM   e.g. call dotnet build <path> --configuration %config%
 REM - Option 2: Let msbuild handle things and build the solution
 REM "%programfiles(x86)%\MSBuild\14.0\Bin\MSBuild.exe" MyLibrary.sln /p:Configuration="%config%" /m /v:M /fl /flp:LogFile=msbuild.log;Verbosity=Normal /nr:false
-call dotnet build srcxi\/AuthorizeCore --configuration %config%
+call dotnet build src\AuthorizeCore --configuration %config%
 if not "%errorlevel%"=="0" goto failure
 
 REM Unit tests
