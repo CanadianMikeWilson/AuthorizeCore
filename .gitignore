@@ -1,4 +1,5 @@
 bin/
+obj/
 project.lock.json
 .build/
 config.json
