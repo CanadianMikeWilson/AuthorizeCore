@@ -74,7 +74,7 @@ namespace AuthorizeCore
         {
             var lineItem = new LineItem {
                 Id = id,
-                Name = name.Length > 32 ? name.Substring(0,32) : name, // Enforce max string length
+                Name = name.Length >= 32 ? name.Substring(0,31) : name, // Enforce max string length
                 Description = description,
                 Quantity = quantity,
                 UnitPrice = unitPrice
