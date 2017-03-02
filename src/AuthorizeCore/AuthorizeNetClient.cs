@@ -241,6 +241,102 @@ namespace AuthorizeCore
             }
             return new AuthorizationFailure("Unable to Parse XML", xmlString);
         }
+
+        private IPaymentResponse ParsePaymentTransactinoResponse(string xmlString, XmlNode transactionResponse)
+        {
+            string responseCode = "";
+            string errorText = "";
+            string errorCode = "";
+            var authCode = "";
+            var avsResultCode = "";
+            var cavvResultCode = "";
+            var transId = "";
+            var transHash = "";
+            var accountNumber = "";
+            var accountType = "";
+            for ( var idx = 0; idx < transactionResponse.ChildNodes.Count; idx++ ) {
+                var el = transactionResponse.ChildNodes[idx];
+                if ( el.Name.Equals("responseCode")) {
+                    responseCode = el.InnerText;
+                }
+                if ( el.Name.Equals("errors") ) {
+                    for ( var errorIdx=0; errorIdx < el.ChildNodes.Count; errorIdx++ ) {
+                        var error = el.ChildNodes[errorIdx];
+                        for ( var eidx=0; eidx < error.ChildNodes.Count; eidx++ ) {
+                            var errorEl = error.ChildNodes[eidx];
+                            if ( errorEl.Name.Equals("errorCode")) {
+                                errorCode = errorEl.InnerText; 
+                            }
+                            if ( errorEl.Name.Equals("errorText")) {
+                                errorText = errorEl.InnerText;
+                            }
+                        }
+                    }
+                }
+                if ( el.Name.Equals("authCode")) {
+                    authCode = el.InnerText;
+                }
+                if ( el.Name.Equals("avsResultCode")) {
+                    avsResultCode = el.InnerText;
+                }
+                if ( el.Name.Equals("cavvResultCode")) {
+                    cavvResultCode = el.InnerText;
+                }
+                if ( el.Name.Equals("transId")) {
+                    transId = el.InnerText;
+                }
+                if ( el.Name.Equals("transHash")) {
+                    transHash = el.InnerText;
+                }
+                if ( el.Name.Equals("accountNumber")) {
+                    accountNumber = el.InnerText;
+                }
+                if ( el.Name.Equals("accountType")) {
+                    accountType = el.InnerText;
+                }
+            }
+            
+            PaymentResponse paymentResponse = null;
+            if ( responseCode.Equals("1") ) {
+                paymentResponse = new PaymentSuccess("This transaction has been approved.", xmlString) {
+                    ResponseCode = responseCode,
+                    ErrorCode = errorCode
+                };
+            } else if ( !string.IsNullOrEmpty(errorText)) {
+                paymentResponse = new PaymentFailure(errorText, xmlString);
+                paymentResponse.ResponseCode = responseCode;
+                paymentResponse.ErrorCode = errorCode;
+            }
+            
+            if ( null != paymentResponse ) {
+                paymentResponse.AuthCode = authCode;
+                paymentResponse.AvsResultCode = avsResultCode;
+                paymentResponse.CavvResultCode = cavvResultCode;
+                paymentResponse.TransId = transId;
+                paymentResponse.TransHash = transHash;
+                paymentResponse.AccountNumber = accountNumber;
+                paymentResponse.AccountType = accountType;                    
+                return paymentResponse;
+            }
+            return new PaymentFailure("Unable to Parse XML as TransactionResponse", xmlString);
+        }
+
+        private IPaymentResponse ParseTransactionErrorResponse(string xmlString)
+        {
+            var responseDoc = new XmlDocument();
+            responseDoc.LoadXml(xmlString);
+            var messageElement = responseDoc.GetElementsByTagName("message");
+            if ( messageElement.Count > 0 ) {
+                var message = messageElement.Item(0);
+                for ( var i = 0; i < message.ChildNodes.Count; i++ ) {
+                    var el = message.ChildNodes[i];
+                    if ( el.Name.Equals("text")) {
+                        return new PaymentFailure(el.InnerText, xmlString);
+                    }
+                }
+            }
+            return new PaymentFailure("Unable to Parse Payment XML", xmlString);
+        }
         
         private IPaymentResponse ParsePaymentResponse(string xmlString)
         {
@@ -249,82 +345,10 @@ namespace AuthorizeCore
             var transactionResponseList = responseDoc.GetElementsByTagName("transactionResponse");
             if (transactionResponseList.Count > 0 ) {
                 var transactionResponse = transactionResponseList.Item(0);
-                string responseCode = "";
-                string errorText = "";
-                string errorCode = "";
-                var authCode = "";
-                var avsResultCode = "";
-                var cavvResultCode = "";
-                var transId = "";
-                var transHash = "";
-                var accountNumber = "";
-                var accountType = "";
-                for ( var idx = 0; idx < transactionResponse.ChildNodes.Count; idx++ ) {
-                    var el = transactionResponse.ChildNodes[idx];
-                    if ( el.Name.Equals("responseCode")) {
-                        responseCode = el.InnerText;
-                    }
-                    if ( el.Name.Equals("errors") ) {
-                        for ( var errorIdx=0; errorIdx < el.ChildNodes.Count; errorIdx++ ) {
-                            var error = el.ChildNodes[errorIdx];
-                            for ( var eidx=0; eidx < error.ChildNodes.Count; eidx++ ) {
-                                var errorEl = error.ChildNodes[eidx];
-                                if ( errorEl.Name.Equals("errorCode")) {
-                                    errorCode = errorEl.InnerText; 
-                                }
-                                if ( errorEl.Name.Equals("errorText")) {
-                                    errorText = errorEl.InnerText;
-                                }
-                            }
-                        }
-                    }
-                    if ( el.Name.Equals("authCode")) {
-                        authCode = el.InnerText;
-                    }
-                    if ( el.Name.Equals("avsResultCode")) {
-                        avsResultCode = el.InnerText;
-                    }
-                    if ( el.Name.Equals("cavvResultCode")) {
-                        cavvResultCode = el.InnerText;
-                    }
-                    if ( el.Name.Equals("transId")) {
-                        transId = el.InnerText;
-                    }
-                    if ( el.Name.Equals("transHash")) {
-                        transHash = el.InnerText;
-                    }
-                    if ( el.Name.Equals("accountNumber")) {
-                        accountNumber = el.InnerText;
-                    }
-                    if ( el.Name.Equals("accountType")) {
-                        accountType = el.InnerText;
-                    }
-                }
-                
-                PaymentResponse paymentResponse = null;
-                if ( responseCode.Equals("1") ) {
-                    paymentResponse = new PaymentSuccess("This transaction has been approved.", xmlString) {
-                        ResponseCode = responseCode,
-                        ErrorCode = errorCode
-                    };
-                } else if ( !string.IsNullOrEmpty(errorText)) {
-                    paymentResponse = new PaymentFailure(errorText, xmlString);
-                    paymentResponse.ResponseCode = responseCode;
-                    paymentResponse.ErrorCode = errorCode;
-                }
-                
-                if ( null != paymentResponse ) {
-                    paymentResponse.AuthCode = authCode;
-                    paymentResponse.AvsResultCode = avsResultCode;
-                    paymentResponse.CavvResultCode = cavvResultCode;
-                    paymentResponse.TransId = transId;
-                    paymentResponse.TransHash = transHash;
-                    paymentResponse.AccountNumber = accountNumber;
-                    paymentResponse.AccountType = accountType;                    
-                    return paymentResponse;
-                }
+                return ParsePaymentTransactinoResponse(xmlString, transactionResponse);
             }
-            return new PaymentFailure("Unable to Parse XML", xmlString);
+
+            return ParseTransactionErrorResponse(xmlString);
         }
     }
 }

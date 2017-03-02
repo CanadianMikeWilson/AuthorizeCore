@@ -207,5 +207,36 @@ namespace AuthorizeCore.Test
             Assert.Equal(result.ErrorCode, "17");
             Assert.False(result.Success);
         }
+
+        // TODO: ?? Should this throw a different error, to be handled by client?
+        [Fact]
+        public async Task Payment_ShouldCorrectlyHandleBadCardData()
+        {
+            var paymentRequest = _client.CreatePaymentRequest(77, 555, 17);
+            paymentRequest.AddLineItem(1, "name", "description", 5, 5);
+            paymentRequest.AddCreditCard("444", _expirydate, "444");
+            paymentRequest.AddBillingAddress("f","l","c","a","c","s","46282","c");
+            paymentRequest.AddShippingAddress("f","l","c","a","c","s","46282","c");
+            var result = await paymentRequest.ProcessPaymentRequest();
+            Assert.IsType<PaymentFailure>(result);
+            Assert.Equal("The 'AnetApi/xml/v1/schema/AnetApiSchema.xsd:cardNumber' element is invalid - The value XXXXX is invalid according to its datatype 'String' - The actual length is less than the MinLength value.", result.Message);
+            Assert.False(result.Success);
+        }
+
+        // TODO: ?? Should this throw a different error, to be handled by client?
+        [Fact]
+        public async Task Payment_ShouldCorrectlyHandleInvalidInvalidCardNumbers()
+        {
+            var paymentRequest = _client.CreatePaymentRequest(77, 555, 17);
+            paymentRequest.AddLineItem(1, "name", "description", 5, 5);
+            var expireyDate = "0121";
+            paymentRequest.AddCreditCard("444444444444444", expireyDate, "444");
+            paymentRequest.AddBillingAddress("f","l","c","a","c","s","46282","c");
+            paymentRequest.AddShippingAddress("f","l","c","a","c","s","46282","c");
+            var result = await paymentRequest.ProcessPaymentRequest();
+            Assert.IsType<PaymentFailure>(result);
+            Assert.Equal("The credit card number is invalid.", result.Message);
+            Assert.False(result.Success);
+        }
     }
 }
