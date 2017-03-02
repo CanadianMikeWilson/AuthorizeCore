@@ -70,16 +70,17 @@ namespace AuthorizeCore
             ShippingCountry = country;
         }
         
-        public void AddLineItem(long id, string name, string description, int quantity, decimal unitPrice)
+        public LineItem AddLineItem(long id, string name, string description, int quantity, decimal unitPrice)
         {
             var lineItem = new LineItem {
                 Id = id,
-                Name = name,
+                Name = name.Length > 32 ? name.Substring(0,32) : name, // Enforce max string length
                 Description = description,
                 Quantity = quantity,
                 UnitPrice = unitPrice
             };
             LineItems.Add(lineItem);
+            return lineItem;
         }
 
         public async Task<IPaymentResponse> ProcessPaymentRequest()

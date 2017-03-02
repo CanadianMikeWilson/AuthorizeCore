@@ -26,6 +26,14 @@ namespace AuthorizeCore.Test
             var Configuration = builder.Build();
             _client = new AuthorizeNetClient(Configuration["apiName"], Configuration["apiKey"], false);
         }
+
+        [Fact]
+        public void PaymentRequest_ShouldRejectLongItemNames()
+        {
+            var paymentRequest = _client.CreatePaymentRequest(77, 55, 1.10m);
+            var line = paymentRequest.AddLineItem(1, "Hanes - Ladies Nano-T Cotton T-Shirt. SL04", "Hanes - Ladies Nano-T Cotton T-Shirt. SL04", 3, 34.45m);
+            Assert.Equal(32, line.Name.Length);
+        }
         
         [Fact]
         public async Task Payment_ShouldReturnSuccess()
