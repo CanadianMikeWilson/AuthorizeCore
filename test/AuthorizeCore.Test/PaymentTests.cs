@@ -31,8 +31,8 @@ namespace AuthorizeCore.Test
         public void PaymentRequest_ShouldRejectLongItemNames()
         {
             var paymentRequest = _client.CreatePaymentRequest(77, 55, 1.10m);
-            var line = paymentRequest.AddLineItem(1, "Hanes - Ladies Nano-T Cotton T-Shirt. SL04", "Hanes - Ladies Nano-T Cotton T-Shirt. SL04", 3, 34.45m);
-            Assert.Equal(32, line.Name.Length);
+            var line = paymentRequest.AddLineItem("1", "Hanes - Ladies Nano-T Cotton T-Shirt. SL04", "Hanes - Ladies Nano-T Cotton T-Shirt. SL04", 3, 34.45m);
+            Assert.Equal(31, line.Name.Length);
         }
         
         [Fact]
@@ -42,9 +42,9 @@ namespace AuthorizeCore.Test
             paymentRequest.AddCreditCard("4007000000027", "0517", "123");
             paymentRequest.AddBillingAddress("bfirst", "blast", "bcompany", "baddress", "bcity", "bstate", "bzip", "bcountry");
             paymentRequest.AddShippingAddress("sfirst", "slast", "scompany", "saddress", "sxity", "sstate", "szip", "scountry");
-            paymentRequest.AddLineItem(1, "Widget", "Widget", 3, 34.45m);
-            paymentRequest.AddLineItem(2, "Bauble", "Bauble", 3, 2.45m);
-            paymentRequest.AddLineItem(3, "Thingamajig", "Thingamajig", 3, 12.57m);
+            paymentRequest.AddLineItem("1", "Widget", "Widget", 3, 34.45m);
+            paymentRequest.AddLineItem("2", "Bauble", "Bauble", 3, 2.45m);
+            paymentRequest.AddLineItem("3", "Thingamajig", "Thingamajig", 3, 12.57m);
             var result = await paymentRequest.ProcessPaymentRequest();
             _output.WriteLine(result.Response);
             _output.WriteLine(result.Message);
@@ -78,7 +78,7 @@ namespace AuthorizeCore.Test
         public async Task Payment_ShouldFailWhenNoCreditCardProvided()
         {
             var paymentRequest = _client.CreatePaymentRequest(77, 555, 10);
-            paymentRequest.AddLineItem(1, "name", "description", 5, 5);
+            paymentRequest.AddLineItem("1", "name", "description", 5, 5);
             var result = await paymentRequest.ProcessPaymentRequest();
             Assert.IsType<PaymentFailure>(result);
             _output.WriteLine(result.Response);
@@ -90,7 +90,7 @@ namespace AuthorizeCore.Test
         public async Task Payment_ShouldFailWhenMpExpiryDateProvided()
         {
             var paymentRequest = _client.CreatePaymentRequest(77, 555, 10);
-            paymentRequest.AddLineItem(1, "name", "description", 5, 5);
+            paymentRequest.AddLineItem("1", "name", "description", 5, 5);
             paymentRequest.AddCreditCard("1234", "", "");
             var result = await paymentRequest.ProcessPaymentRequest();
             Assert.IsType<PaymentFailure>(result);
@@ -103,7 +103,7 @@ namespace AuthorizeCore.Test
         public async Task Payment_ShouldFailWhenInvalidExpiryDateProvided()
         {
             var paymentRequest = _client.CreatePaymentRequest(77, 555, 10);
-            paymentRequest.AddLineItem(1, "name", "description", 5, 5);
+            paymentRequest.AddLineItem("1", "name", "description", 5, 5);
             paymentRequest.AddCreditCard("1234", "444", "");
             var result = await paymentRequest.ProcessPaymentRequest();
             Assert.IsType<PaymentFailure>(result);
@@ -116,7 +116,7 @@ namespace AuthorizeCore.Test
         public async Task Payment_ShouldFailWhenNoCvvProvided()
         {
             var paymentRequest = _client.CreatePaymentRequest(77, 555, 10);
-            paymentRequest.AddLineItem(1, "name", "description", 5, 5);
+            paymentRequest.AddLineItem("1", "name", "description", 5, 5);
             paymentRequest.AddCreditCard("1234", "4444", "");
             var result = await paymentRequest.ProcessPaymentRequest();
             Assert.IsType<PaymentFailure>(result);
@@ -129,7 +129,7 @@ namespace AuthorizeCore.Test
         public async Task Payment_ShouldFailWhenShortCvvProvided()
         {
             var paymentRequest = _client.CreatePaymentRequest(77, 555, 10);
-            paymentRequest.AddLineItem(1, "name", "description", 5, 5);
+            paymentRequest.AddLineItem("1", "name", "description", 5, 5);
             paymentRequest.AddCreditCard("1234", "4444", "55");
             var result = await paymentRequest.ProcessPaymentRequest();
             Assert.IsType<PaymentFailure>(result);
@@ -142,7 +142,7 @@ namespace AuthorizeCore.Test
         public async Task Payment_ShouldFailWhenLongCvvProvided()
         {
             var paymentRequest = _client.CreatePaymentRequest(77, 555, 10);
-            paymentRequest.AddLineItem(1, "name", "description", 5, 5);
+            paymentRequest.AddLineItem("1", "name", "description", 5, 5);
             paymentRequest.AddCreditCard("1234", "4444", "55555");
             var result = await paymentRequest.ProcessPaymentRequest();
             Assert.IsType<PaymentFailure>(result);
@@ -155,7 +155,7 @@ namespace AuthorizeCore.Test
         public async Task Payment_ShouldCorrectlyHandleAvsMispatch()
         {
             var paymentRequest = _client.CreatePaymentRequest(77, 555, 27);
-            paymentRequest.AddLineItem(1, "name", "description", 5, 5);
+            paymentRequest.AddLineItem("1", "name", "description", 5, 5);
             paymentRequest.AddCreditCard("4222222222222", _expirydate, "555");
             paymentRequest.AddBillingAddress("f","l","c","a","c","s","46282","c");
             paymentRequest.AddShippingAddress("f","l","c","a","c","s","46282","c");
@@ -171,7 +171,7 @@ namespace AuthorizeCore.Test
         public async Task Payment_ShouldCorrectlyHandleErrorDuringProcessing()
         {
             var paymentRequest = _client.CreatePaymentRequest(77, 555, 26);
-            paymentRequest.AddLineItem(1, "name", "description", 5, 5);
+            paymentRequest.AddLineItem("1", "name", "description", 5, 5);
             paymentRequest.AddCreditCard("4222222222222", _expirydate, "555");
             paymentRequest.AddBillingAddress("f","l","c","a","c","s","46282","c");
             paymentRequest.AddShippingAddress("f","l","c","a","c","s","46282","c");
@@ -187,7 +187,7 @@ namespace AuthorizeCore.Test
         public async Task Payment_ShouldCorrectlyHandleDuplicateTransactionError()
         {
             var paymentRequest = _client.CreatePaymentRequest(77, 555, 11);
-            paymentRequest.AddLineItem(1, "name", "description", 5, 5);
+            paymentRequest.AddLineItem("1", "name", "description", 5, 5);
             paymentRequest.AddCreditCard("4222222222222", _expirydate, "555");
             paymentRequest.AddBillingAddress("f","l","c","a","c","s","46282","c");
             paymentRequest.AddShippingAddress("f","l","c","a","c","s","46282","c");
@@ -204,7 +204,7 @@ namespace AuthorizeCore.Test
         public async Task Payment_ShouldCorrectlyHandleMerchantDoesntAcceptCard()
         {
             var paymentRequest = _client.CreatePaymentRequest(77, 555, 17);
-            paymentRequest.AddLineItem(1, "name", "description", 5, 5);
+            paymentRequest.AddLineItem("1", "name", "description", 5, 5);
             paymentRequest.AddCreditCard("4222222222222", _expirydate, "555");
             paymentRequest.AddBillingAddress("f","l","c","a","c","s","46282","c");
             paymentRequest.AddShippingAddress("f","l","c","a","c","s","46282","c");
@@ -221,7 +221,7 @@ namespace AuthorizeCore.Test
         public async Task Payment_ShouldCorrectlyHandleBadCardData()
         {
             var paymentRequest = _client.CreatePaymentRequest(77, 555, 17);
-            paymentRequest.AddLineItem(1, "name", "description", 5, 5);
+            paymentRequest.AddLineItem("1", "name", "description", 5, 5);
             paymentRequest.AddCreditCard("444", _expirydate, "444");
             paymentRequest.AddBillingAddress("f","l","c","a","c","s","46282","c");
             paymentRequest.AddShippingAddress("f","l","c","a","c","s","46282","c");
@@ -236,7 +236,7 @@ namespace AuthorizeCore.Test
         public async Task Payment_ShouldCorrectlyHandleInvalidInvalidCardNumbers()
         {
             var paymentRequest = _client.CreatePaymentRequest(77, 555, 17);
-            paymentRequest.AddLineItem(1, "name", "description", 5, 5);
+            paymentRequest.AddLineItem("1", "name", "description", 5, 5);
             var expireyDate = "0121";
             paymentRequest.AddCreditCard("444444444444444", expireyDate, "444");
             paymentRequest.AddBillingAddress("f","l","c","a","c","s","46282","c");
