@@ -4,11 +4,12 @@
     <Description>Authorize.NET for Core Clr</Description>
     <VersionPrefix>1.0.8</VersionPrefix>
     <Authors>mwilson</Authors>
-    <TargetFrameworks>net46;netstandard1.4</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard1.4</TargetFrameworks>
     <AssemblyName>AuthorizeCore</AssemblyName>
     <PackageId>AuthorizeCore</PackageId>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);dotnet5.6;dnxcore50</PackageTargetFallback>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.4' ">$(PackageTargetFallback);dotnet5.4</PackageTargetFallback>
+    <ReleaseVersion>1.0.8</ReleaseVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
