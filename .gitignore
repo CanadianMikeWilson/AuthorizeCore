@@ -1,5 +1,7 @@
+backup/
 bin/
 obj/
 project.lock.json
 .build/
+.vscode/
 config.json
