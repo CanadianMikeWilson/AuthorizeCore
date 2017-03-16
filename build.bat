@@ -4,10 +4,10 @@ if "%config%" == "" (
     set config=Release
 )
 
-set version=1.0.0
+set version=
 if not "%BuildCounter%" == "" (
 REM    set version=--version-suffix 1.0.%BuildCounter%-beta
-   set version=--version-suffix 1.0.8-beta%BuildCounter%
+REM    set version=--version-suffix 1.0.8-beta%BuildCounter%
 )
 
 REM (optional) build.bat is in the root of our repo, cd to the correct folder where sources/projects are
