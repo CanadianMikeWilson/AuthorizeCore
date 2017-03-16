@@ -230,7 +230,7 @@ namespace AuthorizeCore
                     return new AuthorizationSuccess(resultCodeStr, xmlString);
                 } else {
                     var messageElement = responseDoc.GetElementsByTagName("message");
-                    var it = messageElement.GetEnumerator();
+                    //var it = messageElement.GetEnumerator();
                     for ( var i = 0; i < messageElement.Count; i++ ) {
                         var el = messageElement.Item(i);
                         if ( el.Name.Equals("text")) {

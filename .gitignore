@@ -6,3 +6,4 @@ project.lock.json
 .build/
 .vscode/
 config.json
+*.userprefs
