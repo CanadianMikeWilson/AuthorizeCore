@@ -4,11 +4,11 @@
     <Description>Authorize.NET for Core Clr</Description>
     <VersionPrefix>1.0.8</VersionPrefix>
     <Authors>mwilson</Authors>
-    <TargetFrameworks>net45;netstandard1.4</TargetFrameworks>
+    <TargetFrameworks>netcoreapp1.1;netstandard1.6</TargetFrameworks>
     <AssemblyName>AuthorizeCore</AssemblyName>
     <PackageId>AuthorizeCore</PackageId>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);dotnet5.6;dnxcore50</PackageTargetFallback>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.4' ">$(PackageTargetFallback);dotnet5.4</PackageTargetFallback>
+    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">$(PackageTargetFallback);dotnet5.6;dnxcore50</PackageTargetFallback>
+    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(PackageTargetFallback);dotnet5.4</PackageTargetFallback>
     <ReleaseVersion>1.0.8</ReleaseVersion>
   </PropertyGroup>
 
@@ -30,7 +30,7 @@
     <PackageReference Include="System.Runtime" Version="4.3.0" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
     <PackageReference Include="System.Linq" Version="4.3.0" />
     <PackageReference Include="System.Xml.XmlDocument" Version="4.0.1" />
   </ItemGroup>
