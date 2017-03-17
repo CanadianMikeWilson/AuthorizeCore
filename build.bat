@@ -5,9 +5,9 @@ if "%config%" == "" (
 )
 
 set version=
-if not "%BuildCounter%" == "" (
-   set version=--version-suffix ci-%BuildCounter%
-)
+REM if not "%BuildCounter%" == "" (
+REM    set version=--version-suffix ci-%BuildCounter%
+REM )
 
 REM (optional) build.bat is in the root of our repo, cd to the correct folder where sources/projects are
 REM cd MyLibrary
