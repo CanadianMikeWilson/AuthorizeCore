@@ -33,7 +33,7 @@ REM if not "%errorlevel%"=="0" goto failure
 
 REM Package
 mkdir %cd%\Artifacts
-call dotnet pack AuthorizeCore.sln --configuration %config% %version% --output Artifacts
+call dotnet pack src\AuthorizeCore\AuthorizeCore.csproj --configuration %config% %version% --output Artifacts
 if not "%errorlevel%"=="0" goto failure
 
 :success
