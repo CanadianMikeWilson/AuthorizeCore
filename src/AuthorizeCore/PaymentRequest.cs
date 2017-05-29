@@ -73,9 +73,9 @@ namespace AuthorizeCore
         public LineItem AddLineItem(string id, string name, string description, int quantity, decimal unitPrice)
         {
             var lineItem = new LineItem {
-                Id = id.Length > 31 ? id.Substring(0,31) : id, // Enforce max string length
-                Name = name.Length > 31 ? name.Substring(0,31) : name, // Enforce max string length
-                Description = description.Length > 255 ? description.Substring(0,255) : description,
+                Id = id?.Length > 31 ? id.Substring(0,31) : id, // Enforce max string length
+                Name = name?.Length > 31 ? name.Substring(0,31) : name, // Enforce max string length
+                Description = description?.Length > 255 ? description.Substring(0,255) : description,
                 Quantity = quantity,
                 UnitPrice = unitPrice
             };

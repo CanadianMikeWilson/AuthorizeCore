@@ -34,6 +34,14 @@ namespace AuthorizeCore.Test
             var line = paymentRequest.AddLineItem("1", "Hanes - Ladies Nano-T Cotton T-Shirt. SL04", "Hanes - Ladies Nano-T Cotton T-Shirt. SL04", 3, 34.45m);
             Assert.Equal(31, line.Name.Length);
         }
+
+        [Fact]
+        public void PaymentRequest_ShouldAcceptNullValues()
+        {
+            var paymentRequest = _client.CreatePaymentRequest(77, 55, 1.10m);
+            var line = paymentRequest.AddLineItem(null, null, null, 3, 34.45m);
+            Assert.NotNull(line);
+        }
         
         [Fact]
         public async Task Payment_ShouldReturnSuccess()

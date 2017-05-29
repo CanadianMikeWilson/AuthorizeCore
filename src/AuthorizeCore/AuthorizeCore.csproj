@@ -4,25 +4,22 @@
     <Description>Authorize.NET for Core Clr</Description>
     <VersionPrefix>1.0.8</VersionPrefix>
     <Authors>mwilson</Authors>
-    <TargetFrameworks>netcoreapp1.1;netstandard1.6</TargetFrameworks>
+    <TargetFrameworks>netcoreapp1.0;netcoreapp1.1;netstandard1.6</TargetFrameworks>
     <AssemblyName>AuthorizeCore</AssemblyName>
     <PackageId>AuthorizeCore</PackageId>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">$(PackageTargetFallback);dotnet5.6;dnxcore50</PackageTargetFallback>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(PackageTargetFallback);dotnet5.4</PackageTargetFallback>
-    <ReleaseVersion>1.0.8</ReleaseVersion>
+    <OutputType>Library</OutputType>
+    <ReleaseVersion>1.0.9</ReleaseVersion>
+    <RuntimeFrameworkVersion>1.1.1</RuntimeFrameworkVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>false</DebugSymbols>
-    <DebugType></DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <ExternalConsole>false</ExternalConsole>
-    <DebugType></DebugType>
-  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Net.Http" Version="4.3.1" />
     <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
+    <PackageReference Include="System.Collections" Version="4.3.0" />
+    <PackageReference Include="System.Runtime" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
